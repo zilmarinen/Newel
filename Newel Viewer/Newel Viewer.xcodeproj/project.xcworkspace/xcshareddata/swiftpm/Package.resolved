@@ -1,0 +1,15 @@
+{
+  "originHash" : "6f98d0be3b35508717ccddcf98d7f8999da1773cd3662299ecce9fc838fc72e9",
+  "pins" : [
+    {
+      "identity" : "euclid",
+      "kind" : "remoteSourceControl",
+      "location" : "git@github.com:nicklockwood/Euclid.git",
+      "state" : {
+        "branch" : "main",
+        "revision" : "841cc3074bd518794340bf8fa9bee6c796e77144"
+      }
+    }
+  ],
+  "version" : 3
+}
