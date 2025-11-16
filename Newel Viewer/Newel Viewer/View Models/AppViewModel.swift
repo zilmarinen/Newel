@@ -11,16 +11,32 @@ import Deltille
 import Euclid
 import Foundation
 import Lattice
+import Newel
 import SceneKit
 import SwiftUI
 
 @MainActor
 internal class AppViewModel: ObservableObject {
     
-    internal let footprint: Footprint = .init(Triangle.zero,
-                                              [Triangle.zero,
-                                               .init(-1, 0, 0),
-                                               .init(0, 0, -1)])
+    @Published internal var stoop: Stoop = .small {
+        
+        didSet {
+            
+            guard oldValue != stoop else { return }
+            
+            updateScene()
+        }
+    }
+    
+    @Published internal var direction: Stoop.Direction = .ascending {
+        
+        didSet {
+            
+            guard oldValue != direction else { return }
+            
+            updateScene()
+        }
+    }
     
     internal let scene = SCNScene()
     
@@ -53,7 +69,10 @@ extension AppViewModel {
     
     private func updateModel() {
         
-        let mesh = Mesh.empty
+        let mesh = Mesh.staircase(stoop,
+                                  7,
+                                  Triangle.Scale.tile.edgeLength / 2.0,
+                                  direction)
         
         model.geometry = .init(mesh)
         wireframe.geometry = .init(wireframe: mesh)
@@ -63,7 +82,7 @@ extension AppViewModel {
         
         var mesh = Mesh([])
         
-        for tile in footprint.perimeter {
+        for tile in stoop.footprint.perimeter {
             
             let color: NSColor = tile.isPointy ? gridColor : gridAlternateColor
             

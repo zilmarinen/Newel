@@ -7,6 +7,7 @@
 
 import Deltille
 import Lattice
+import Newel
 import SceneKit
 import SwiftUI
 
@@ -51,15 +52,25 @@ struct AppView: View {
     
     @ViewBuilder
     var toolbar: some View {
-        Text("")
-//        Picker("Septomino",
-//               selection: $viewModel.septomino) {
-//            
-//            ForEach(Triangle.Septomino.allCases, id: \.self) { septomino in
-//                
-//                Text(septomino.id)
-//                    .id(septomino)
-//            }
-//        }
+        
+        Picker("Stoop",
+               selection: $viewModel.stoop) {
+            
+            ForEach(Stoop.allCases, id: \.self) { stoop in
+                
+                Text(stoop.id)
+                    .id(stoop)
+            }
+        }
+        
+        Picker("Direction",
+               selection: $viewModel.direction) {
+            
+            ForEach(Stoop.Direction.allCases, id: \.self) { direction in
+                
+                Text(direction.id)
+                    .id(direction)
+            }
+        }
     }
 }
