@@ -1,5 +1,5 @@
 //
-//  Stoop.swift
+//  StaircaseType.swift
 //  Newel
 //
 //  Created by Zack Brown on 16/11/2025.
@@ -7,14 +7,18 @@
 
 import Deltille
 import Euclid
+import Lattice
 
-public enum Stoop: String,
-                   CaseIterable,
-                   Identifiable {
+public enum StaircaseType: String,
+                           CaseIterable,
+                           Codable,
+                           Identifiable,
+                           Sendable {
     
     public enum Direction: String,
                            CaseIterable,
-                           Identifiable {
+                           Identifiable,
+                           Sendable {
         
         case ascending
         case descending
@@ -27,10 +31,7 @@ public enum Stoop: String,
     
     public var id: String { rawValue.capitalized }
     
-    public var footprint: Footprint<Triangle.Scale,
-                                    Triangle,
-                                    Triangle.Rotation,
-                                    Triangle.Vertex> { .init(Triangle.zero, tiles) }
+    public var footprint: Triangle.Footprint { .init(Triangle.zero, tiles) }
     
     internal var tiles: [Triangle] {
         
@@ -91,5 +92,20 @@ public enum Stoop: String,
             return [lhe,
                     rhe]
         }
+    }
+    
+    public func template(displacement: Double) -> Mesh {
+        
+        var mesh = Mesh.empty
+        
+        for tile in tiles {
+            
+            let volume = Volume(vertices: tile.vertices.position(.tile),
+                                displacement: displacement)
+            
+            mesh = mesh.union(volume.mesh(.white))
+        }
+        
+        return mesh
     }
 }

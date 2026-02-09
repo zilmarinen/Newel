@@ -9,12 +9,12 @@ import Euclid
 
 extension Mesh {
     
-    public static func staircase(_ stoop: Stoop,
+    public static func staircase(_ staircaseType: StaircaseType,
                                  _ steps: Int,
                                  _ height: Double,
-                                 _ direction: Stoop.Direction) -> Self {
+                                 _ direction: StaircaseType.Direction) -> Self {
         
-        guard let (v0, v1, v2, v3) = stoop.corners else { return .empty }
+        guard let (v0, v1, v2, v3) = staircaseType.corners else { return .empty }
         
         let rise = 1.0 / Double(steps)
         

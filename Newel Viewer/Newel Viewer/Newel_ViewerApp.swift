@@ -8,7 +8,7 @@
 import SwiftUI
 
 @main
-struct Verdure_ViewerApp: App {
+struct Newel_ViewerApp: App {
     
     var body: some Scene {
         

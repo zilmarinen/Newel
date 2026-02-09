@@ -47,26 +47,26 @@ struct AppView: View {
                 toolbar
             }
         }
-        .navigationTitle("Verdure")
+        .navigationTitle("Newel")
     }
     
     @ViewBuilder
     var toolbar: some View {
         
-        Picker("Stoop",
-               selection: $viewModel.stoop) {
+        Picker("StaircaseType",
+               selection: $viewModel.staircaseType) {
             
-            ForEach(Stoop.allCases, id: \.self) { stoop in
+            ForEach(StaircaseType.allCases, id: \.self) { staircaseType in
                 
-                Text(stoop.id)
-                    .id(stoop)
+                Text(staircaseType.id)
+                    .id(staircaseType)
             }
         }
         
         Picker("Direction",
                selection: $viewModel.direction) {
             
-            ForEach(Stoop.Direction.allCases, id: \.self) { direction in
+            ForEach(StaircaseType.Direction.allCases, id: \.self) { direction in
                 
                 Text(direction.id)
                     .id(direction)

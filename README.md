@@ -36,4 +36,4 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 
 # Credits
 
-The Alluvium framework is primarily the work of [Zack Brown](https://github.com/zilmarinen).
+The Newel framework is primarily the work of [Zack Brown](https://github.com/zilmarinen).

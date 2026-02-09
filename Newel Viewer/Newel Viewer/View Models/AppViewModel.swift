@@ -18,17 +18,17 @@ import SwiftUI
 @MainActor
 internal class AppViewModel: ObservableObject {
     
-    @Published internal var stoop: Stoop = .small {
+    @Published internal var staircaseType: StaircaseType = .small {
         
         didSet {
             
-            guard oldValue != stoop else { return }
+            guard oldValue != staircaseType else { return }
             
             updateScene()
         }
     }
     
-    @Published internal var direction: Stoop.Direction = .ascending {
+    @Published internal var direction: StaircaseType.Direction = .ascending {
         
         didSet {
             
@@ -69,7 +69,7 @@ extension AppViewModel {
     
     private func updateModel() {
         
-        let mesh = Mesh.staircase(stoop,
+        let mesh = Mesh.staircase(staircaseType,
                                   7,
                                   Triangle.Scale.tile.edgeLength / 2.0,
                                   direction)
@@ -82,9 +82,9 @@ extension AppViewModel {
         
         var mesh = Mesh([])
         
-        for tile in stoop.footprint.perimeter {
+        for tile in staircaseType.footprint.perimeter {
             
-            let color: NSColor = tile.isPointy ? gridColor : gridAlternateColor
+            let color = tile.isPointy ? gridColor : gridAlternateColor
             
             mesh = mesh.merge(tile.mesh(.tile,
                                         .init(color)))
