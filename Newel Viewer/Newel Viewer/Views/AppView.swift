@@ -5,8 +5,8 @@
 //  Created by Zack Brown on 15/11/2025.
 //
 
+import Bivouac
 import Deltille
-import Lattice
 import Newel
 import SceneKit
 import SwiftUI
@@ -53,23 +53,33 @@ struct AppView: View {
     @ViewBuilder
     var toolbar: some View {
         
-        Picker("StaircaseType",
-               selection: $viewModel.staircaseType) {
+        Picker("Slope",
+               selection: $viewModel.slope) {
             
-            ForEach(StaircaseType.allCases, id: \.self) { staircaseType in
+            ForEach(Slope.allCases, id: \.self) { slope in
                 
-                Text(staircaseType.id)
-                    .id(staircaseType)
+                Text(slope.id)
+                    .id(slope)
             }
         }
         
-        Picker("Direction",
-               selection: $viewModel.direction) {
+        Picker("Rise",
+               selection: $viewModel.rise) {
             
-            ForEach(StaircaseType.Direction.allCases, id: \.self) { direction in
+            ForEach(Rise.allCases, id: \.self) { rise in
                 
-                Text(direction.id)
-                    .id(direction)
+                Text(rise.id)
+                    .id(rise)
+            }
+        }
+        
+        Picker("Cast",
+               selection: $viewModel.cast) {
+            
+            ForEach(Cast.allCases, id: \.self) { cast in
+                
+                Text(cast.id)
+                    .id(cast)
             }
         }
     }

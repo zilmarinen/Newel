@@ -13,16 +13,16 @@ let package = Package(
     ],
     dependencies: [
         .package(path: "../Alluvium"),
+        .package(path: "../Bivouac"),
         .package(path: "../Deltille"),
         .package(url: "git@github.com:nicklockwood/Euclid.git",
                  branch: "main"),
-        .package(path: "../Lattice"),
     ],
     targets: [
         .target(name: "Newel",
                 dependencies: ["Alluvium",
+                               "Bivouac",
                                "Deltille",
-                               "Euclid",
-                               "Lattice"])
+                               "Euclid"])
     ]
 )

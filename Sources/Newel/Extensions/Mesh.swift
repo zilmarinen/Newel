@@ -5,88 +5,140 @@
 //  Created by Zack Brown on 15/11/2025.
 //
 
+import Bivouac
+import Deltille
 import Euclid
 
 extension Mesh {
     
-    public static func staircase(_ staircaseType: StaircaseType,
-                                 _ steps: Int,
-                                 _ height: Double,
-                                 _ direction: StaircaseType.Direction) -> Self {
+    public static func slope(_ slope: Slope,
+                             _ rise: Rise,
+                             _ cast: Cast,
+                             _ color: Color) -> Self {
         
-        guard let (v0, v1, v2, v3) = staircaseType.corners else { return .empty }
+        var mesh = Mesh.empty
         
-        let rise = 1.0 / Double(steps)
+        for tile in slope.tiles {
+            
+            let stencil = tile.triangle.stencil(.tile)
+            
+            let tileRise = rise == .ascending ? tile.rise : tile.rise.inverse
+            
+            let part = switch cast {
+            
+            case .sloped:
+                
+                Self.slope(tileRise,
+                           stencil,
+                           color)
+                
+            case .terraced:
+                
+                Self.terrace(tileRise,
+                             stencil,
+                             color)
+            }
+            
+            guard tile.rotation != .identity else {
+                
+                mesh = mesh.union(part)
+                
+                continue
+            }
+            
+            let offset = tile.triangle.vertex.position(.tile)
+            let angle = Angle(radians: tile.rotation.radians)
+            let rotation = Rotation.yaw(angle)
+            
+            let transformed = part.translated(by: -offset).rotated(by: rotation).translated(by: offset)
+            
+            mesh = mesh.union(transformed)
+        }
         
-        var faces: [[Vector]] = []
+        return mesh
+    }
+    
+    private static func slope(_ rise: Rise,
+                              _ stencil: Triangle.Stencil,
+                              _ color: Color) -> Self {
         
-        faces.append([v0, v1, v2, v3])
+        let elevation = Vector(0.0, Rise.elevation, 0.0)
         
-        switch direction {
+        let v0 = stencil.v0 + (!rise.ascending ? elevation : .zero)
+        let v1 = stencil.v1 + (rise.ascending ? elevation : .zero)
+        let v2 = stencil.v2 + (rise.ascending ? elevation : .zero)
+        
+        var faces = [[stencil.v2, stencil.v1, stencil.v0],
+                     [v0, v1, v2]]
+        
+        switch rise {
             
         case .ascending:
             
-            faces.append([v2,
-                          v1,
-                          v1 + .init(0.0, height, 0.0),
-                          v2 + .init(0.0, height, 0.0)])
+            faces.append([stencil.v0, stencil.v1, v1])
+            faces.append([stencil.v2, stencil.v0, v2])
+            faces.append([stencil.v1, stencil.v2, v2, v1])
             
         case .descending:
             
-            faces.append([v0,
-                          v3,
-                          v3 + .init(0.0, height, 0.0),
-                          v0 + .init(0.0, height, 0.0)])
+            faces.append([stencil.v0, stencil.v1, v0])
+            faces.append([stencil.v2, stencil.v0, v0])
         }
         
-        for step in 0..<steps {
+        let surfaces = faces.compactMap {
             
-            let i = rise * Double(step)
-            let j = rise * Double(step + 1)
-            
-            let iStep = direction == .ascending ? i : 1.0 - i
-            let jStep = direction == .ascending ? j : 1.0 - j
-            
-            let elevationStart = Vector(0.0, (height * iStep), 0.0)
-            let elevationEnd = Vector(0.0, (height * jStep), 0.0)
-            
-            let v4 = v0.lerp(v1, i)
-            let v5 = v0.lerp(v1, j)
-            let v6 = v3.lerp(v2, i)
-            let v7 = v3.lerp(v2, j)
-            
-            //lhs
-            faces.append([v5,
-                          v4,
-                          v4 + elevationEnd,
-                          v5 + elevationEnd])
-            
-            //rhs
-            faces.append([v6,
-                          v7,
-                          v7 + elevationEnd,
-                          v6 + elevationEnd])
-            
-            //front
-            
-            faces.append([v4 + elevationEnd,
-                          v4 + elevationStart,
-                          v6 + elevationStart,
-                          v6 + elevationEnd])
-            
-            //tread
-            
-            faces.append([v5 + elevationEnd,
-                          v4 + elevationEnd,
-                          v6 + elevationEnd,
-                          v7 + elevationEnd])
+            Polygon.surface($0,
+                            color)
         }
         
-        let polygons = faces.compactMap {
+        return Mesh(surfaces)
+    }
+    
+    private static func terrace(_ rise: Rise,
+                                _ stencil: Triangle.Stencil,
+                                _ color: Color) -> Self {
+        
+        let steps = [[stencil.v0, stencil.v3, stencil.v4],
+                     [stencil.v3, stencil.v5, stencil.v7, stencil.v4],
+                     [stencil.v5, stencil.v8, stencil.v11, stencil.v7],
+                     [stencil.v8, stencil.v1, stencil.v2, stencil.v11]]
+        
+        let stepHeight = Rise.elevation / Double(steps.count)
+        
+        var mesh = Mesh.empty
+        
+        for i in steps.indices {
             
-            Polygon($0)
+            let step = steps[i]
+            
+            let height = rise.ascending ? stepHeight * Double(i + 1) : Rise.elevation - (stepHeight * Double(i))
+            
+            let elevation = Vector(0.0, height, 0.0)
+            
+            var faces = [step.map { $0 + elevation },
+                         step.reversed()]
+            
+            for j in step.indices {
+                
+                let k = (j + 1) % step.count
+                
+                let v0 = step[j]
+                let v1 = step[k]
+                let v2 = v1 + elevation
+                let v3 = v0 + elevation
+                
+                faces.append([v0, v1, v2, v3])
+            }
+            
+            let surfaces = faces.compactMap {
+                
+                Polygon.surface($0,
+                                color)
+            }
+            
+            mesh = mesh.union(Mesh(surfaces))
         }
         
-        return Mesh(polygons)
+        return mesh
     }
 }

@@ -6,11 +6,11 @@
 //
 
 import Alluvium
+import Bivouac
 import Combine
 import Deltille
 import Euclid
 import Foundation
-import Lattice
 import Newel
 import SceneKit
 import SwiftUI
@@ -18,21 +18,31 @@ import SwiftUI
 @MainActor
 internal class AppViewModel: ObservableObject {
     
-    @Published internal var staircaseType: StaircaseType = .small {
+    @Published internal var slope: Slope = .corner {
         
         didSet {
             
-            guard oldValue != staircaseType else { return }
+            guard oldValue != slope else { return }
             
             updateScene()
         }
     }
     
-    @Published internal var direction: StaircaseType.Direction = .ascending {
+    @Published internal var rise: Rise = .ascending {
         
         didSet {
             
-            guard oldValue != direction else { return }
+            guard oldValue != rise else { return }
+            
+            updateScene()
+        }
+    }
+    
+    @Published internal var cast: Cast = .terraced {
+        
+        didSet {
+            
+            guard oldValue != cast else { return }
             
             updateScene()
         }
@@ -42,6 +52,7 @@ internal class AppViewModel: ObservableObject {
     
     internal let gridColor: NSColor = .grid
     internal let gridAlternateColor: NSColor = .gridAlternate
+    internal let slopeColor: NSColor = .slope
     
     internal let model = SCNNode()
     internal let wireframe = SCNNode()
@@ -69,10 +80,10 @@ extension AppViewModel {
     
     private func updateModel() {
         
-        let mesh = Mesh.staircase(staircaseType,
-                                  7,
-                                  Triangle.Scale.tile.edgeLength / 2.0,
-                                  direction)
+        let mesh = Mesh.slope(slope,
+                              rise,
+                              cast,
+                              .init(slopeColor))
         
         model.geometry = .init(mesh)
         wireframe.geometry = .init(wireframe: mesh)
@@ -82,12 +93,24 @@ extension AppViewModel {
         
         var mesh = Mesh([])
         
-        for tile in staircaseType.footprint.perimeter {
+        let tiles = slope.coordinates.map {
+            
+            Triangle($0)
+        }
+        
+        let perimeter = Set(tiles.flatMap {
+            
+            $0.perimeter
+        })
+        
+        for tile in perimeter {
             
             let color = tile.isPointy ? gridColor : gridAlternateColor
             
-            mesh = mesh.merge(tile.mesh(.tile,
-                                        .init(color)))
+            guard let surface = Mesh.surface(tile.vertices.position(.tile),
+                                                         .init(color)) else { continue }
+                        
+            mesh = mesh.merge(surface)
         }
         
         surface.geometry = .init(mesh)
